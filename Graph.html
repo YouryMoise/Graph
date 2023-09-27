@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+h1{position:absolute;}
+#xvar{left:20%;top:65%;}
+#yvar{transform:rotate(270deg);top:20%;left:0%;}
+#horizRow h2{display:inline;margin:1.5%;font-size:18px;}
+#vertRow h2{display:block;,margin:0;padding:0;font-size:21px;}
+div{position:absolute;width:100%;}
+#horizRow{top:65%;;left:3%}
+#vertRow{top:0%;left:55%;}
+
+.summary{position:absolute;left:70%;font-size:20px;}
+#rval{top:10%;}
+#rsquared{top:20%;}
+#equation{top:40%;}
+
+
+</style>
+</head>
+
+<body>
+<h1 id = "xvar">Explanatory</h1>
+<h1 id = "yvar">Response</h1>
+
+<div id = "horizRow">
+<h2 id = 'ex1'></h2>
+<h2 id = 'ex2'></h2>
+<h2 id = 'ex3'></h2>
+<h2 id = 'ex4'></h2>
+<h2 id = 'ex5'></h2>
+<h2 id = 'ex6'></h2>
+<h2 id = 'ex7'></h2>
+<h2 id = 'ex8'></h2>
+<h2 id = 'ex9'></h2>
+<h2 id = 'ex10'></h2>
+</div>
+
+<div id = "vertRow">
+<h2 id = 'res1'></h2>
+<h2 id = 'res2'></h2>
+<h2 id = 'res3'></h2>
+<h2 id = 'res4'></h2>
+<h2 id = 'res5'></h2>
+<h2 id = 'res6'></h2>
+<h2 id = 'res7'></h2>
+<h2 id = 'res8'></h2>
+<h2 id = 'res9'></h2>
+<h2 id = 'res10'></h2>
+</div>
+
+<canvas id = "canvas" height = 400 width = 750>
+
+</canvas>
+
+<h1 class = 'summary' id = 'rval'></h1>
+<h1 class = 'summary' id = 'rsquared'></h1>
+<h1 class = 'summary' id = 'equation'></h1>
+
+<input id = 'customExp' style = 'position:absolute;top:80%;left:5%;' value = 'X name here'></input>
+<input id = 'customRes' style = 'position:absolute;top:90%;left:5%;' value = 'Y name here'></input>
+
+<button onclick = 'connect()' style = 'position:absolute;top:83.5%;left:35%;height:5%;'>Graph and Find LSRL</button>
+
+<input id = 'xInput' style = 'position:absolute;left:20%;top:80%;' value = 'X values here'></input>
+<input id = 'yInput' style = 'position:absolute;left:20%;top:90%;' value = 'Y values here'></input>
+
+
+
+<script>
+
+
+let canvas = document.getElementById('canvas');
+let ctx = canvas.getContext('2d');
+function line(startx,starty, gox,goy){
+ctx.beginPath();
+ctx.moveTo(startx,starty);
+ctx.lineTo(gox,goy);
+ctx.stroke();
+}
+
+
+//attempt to see if input will work
+
+function inputAdd(){
+let a = document.getElementById('xvals').value;
+//parseInt every even index
+let numbers = [];	
+for(i=0;i<a.length;i+=2){
+numbers.push(parseInt(a[i]));
+}
+console.log(numbers[1]+3);
+}
+
+
+for(i = 1;i<11;i++){
+line(70*i,10,70*i,400);
+}
+
+for(j = 1;j<11;j++){
+line(70,40*j,700,40*j);
+}
+
+function variables(){
+document.getElementById('xvar').innerHTML = document.getElementById('customExp').value;
+document.getElementById('yvar').innerHTML = document.getElementById('customRes').value;
+}
+
+//lowest and highest x and y values, will have to make plot function based on value - low value 
+let lowExp = 0;
+let highExp = 0;
+let xrange = highExp-lowExp;
+let lowRes = 0;
+let highRes = 0;
+let yrange = highRes - lowRes;
+
+function setValues(){
+for(i=0;i<10;i++){
+document.getElementById('ex'+(i+1)).innerHTML = (lowExp+(xrange/9)*i).toFixed(1);
+}
+
+for(i=10;i>0;i--){
+document.getElementById('res'+i).innerHTML =(lowRes+(yrange/9)*(10-i)).toFixed(1);
+}
+}
+
+function plot(x,y){
+ctx.fillStyle = '#ff0000';
+ctx.fillRect((x-lowExp)/(highExp-lowExp)*700+65,395-(y-lowRes)/(highRes-lowRes)*400,10,10);
+}
+
+
+//make it plot dots based on what type of curve
+function graph(typeOf,startx,starty,rate){
+plot(startx,starty);
+switch(typeOf){
+case 'linear':
+for(i=0;i<10;i++){
+plot(startx+i,starty+rate*i);
+line((startx+(i-1))*70+65,398-40*(starty+rate*(i-1)),(startx+i)*70+65,398-40*(starty
+
++rate*i));
+}
+break;
+
+case 'expo':
+plot(startx,starty);
+for(i=0;i<10;i+=0.1){
+line((startx+(i-1))*70+65,398-40*(starty*rate**(i-1)),(startx+i)*70+65,398-40*
+
+(starty*rate**i));
+}
+break;
+}
+}
+
+//Can graph negative numbers
+//graph('expo',0,0.1,1.9);
+//plot(-0.1,4);
+
+//graph('linear',0,0,2);
+
+
+
+
+//everything below here is to figure out the lsrl
+
+//adding in sum code
+function sum(numbers){
+let total = 0;
+for(i=0;i<numbers.length;i++){
+total+=numbers[i];
+}
+return total;
+
+}
+//mean code
+function mean(nums){
+let meanTotal = sum(nums);
+let ave = meanTotal/(nums.length);
+console.log("The mean is "+ave+', the sum is'+meanTotal);
+return ave;
+}
+
+
+
+//adding in the r code from the challenges
+function correlation(xvals,yvals){
+let sumxy = 0;
+let sumxsumy = 0;
+let sumsquaredx = 0;//this is every x added up then squared
+let sumxsquared = 0;//square then add
+let sumsquaredy = 0;
+let sumysquared = 0;
+let n = xvals.length;
+for(i=0;i<xvals.length;i++){
+sumxy+=(xvals[i]*yvals[i]);
+}
+sumxsumy+=(sum(xvals)*sum(yvals));
+sumsquaredx+=(sum(xvals)**2);
+sumsquaredy+=(sum(yvals)**2);
+
+for(i=0;i<xvals.length;i++){
+sumxsquared+=(xvals[i]**2)
+}
+for(i=0;i<xvals.length;i++){
+sumysquared+=(yvals[i]**2)
+}
+
+let r = (n*sumxy - sumxsumy)  /  (Math.sqrt(n*sumxsquared - sumsquaredx) * Math.sqrt
+
+(n*sumysquared - sumsquaredy));
+
+console.log('r'+r);
+return r;
+}
+
+
+
+//code to find standard deviation
+
+
+function standDev(numbers,type){
+let average = mean(numbers);
+let newNumbers = []
+for(i=0;i<numbers.length;i++){
+newNumbers[i] = (numbers[i]-average)**2;
+}
+let total = sum(newNumbers);
+if(type == 'sample' || type == 'samp'){
+total/=numbers.length-1;
+total = Math.sqrt(total);
+console.log("The standard deviation is "+total);
+}
+
+
+else if(type == 'pop' || type == "population"){
+total/=numbers.length;
+total = Math.sqrt(total);
+console.log("The standard deviation is "+total);
+}
+
+else{console.log("Is it a sample or a population?");}
+return total;
+}
+
+
+correlation([2,5,6],[1,2,3]);
+
+// code to calculate b
+function slope(xvalues,yvalues){
+let r = correlation(xvalues,yvalues);
+let sy = standDev(yvalues,'pop');
+let sx = standDev(xvalues,'pop');
+let b = sy/sx*r;
+console.log('b:'+b);
+console.log('r'+r);
+return b;
+}
+
+
+//function to find a
+
+function yint(x,y){
+let xbar = mean(x);
+let ybar = mean(y);
+let b = slope(x,y);
+let a = ybar - xbar*b;
+console.log('This is a:'+a);
+return a;
+}
+
+
+
+function lsrl(xv,yv){
+let b = slope(xv,yv);
+ctx.lineWidth = 5;
+ctx.strokeStyle = 'blue';
+let a = yint(xv,yv);
+
+
+line(65,398-(((lowExp*b+a)-lowRes)/(highRes-lowRes)*400),750,398-((highExp*b+a)-lowRes)/(highRes-
+
+lowRes)*400);
+
+
+}
+
+
+//function that connects every point to the next point for things like linear regression, 
+
+//maybe takes in x and y arrays or several [x,y] arrays, or just list of numbers grouping 2s into coordinates
+
+/*
+function connectt(){
+let xInput = document.getElementById('xInput').value;
+let yInput = document.getElementById('yInput').value;
+
+let x = [];
+let y = [];
+for(i=0;i<xInput.length;i+=2){
+x.push(parseInt(xInput[i]));
+}
+for(i=0;i<yInput.length;i+=2){
+y.push(parseInt(yInput[i]));
+}
+console.log(x,y);
+}
+*/
+
+function connect(){
+variables();
+let xInput = document.getElementById('xInput').value;
+let yInput = document.getElementById('yInput').value;
+
+let x = [];
+let y = [];
+xInput = xInput.split(",");
+for(i=0;i<xInput.length;i++){
+x.push(parseInt(xInput[i]));
+}
+yInput = yInput.split(",");
+for(i=0;i<xInput.length;i++){
+y.push(parseInt(yInput[i]));
+}
+
+lowExp = Math.min(...x)*0.95;
+highExp = Math.max(...x)*1.05;
+lowRes = Math.min(...y)*0.95;
+highRes = Math.max(...y)*1.05;
+xrange = highExp - lowExp;
+yrange = highRes - lowRes;
+setValues();
+
+console.log(highExp);
+
+for(i=0;i<x.length;i++){
+plot(x[i],y[i]);
+}
+ctx.lineWidth = 0;
+for(i=0;i<x.length;i++){
+//line((x[i]/(highExp/10))*70+65,395-40*(y[i]/(highRes/10)),(x[i+1]/(highExp/10))*70+65,395-40*(y[i+1]/(highRes/10)));
+}
+lsrl(x,y);
+let corCo = correlation(x,y);
+document.getElementById('rval').innerHTML = 'The correlation coefficient, r, is '+corCo.toFixed(2);
+document.getElementById('equation').innerHTML = 'The equation representng this distribution can be written as y = '+yint(x,y).toFixed(2)+'+'+slope(x,y).toFixed(4)+'x';
+document.getElementById('rsquared').innerHTML = 'The coefficient of determination, r^2, is '+(corCo**2).toFixed(5)+'. The LSRL accounts for '+(corCo**2*100).toFixed(2)+'% of the variability in y over x';
+}
+
+
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
